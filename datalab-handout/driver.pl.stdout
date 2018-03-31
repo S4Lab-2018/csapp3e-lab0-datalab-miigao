@@ -1,0 +1,35 @@
+1. Running './dlc -z' to identify coding rules violations.
+dlc:bits.c:320:float_i2f: Warning: 33 operators exceeds max of 30
+
+2. Compiling and running './btest -g' to determine correctness score.
+gcc -O -Wall -m64 -lm -o btest bits.c btest.c decl.c tests.c 
+
+3. Running './dlc -Z' to identify operator count violations.
+dlc:save-bits.c:320:float_i2f: Warning: 33 operators exceeds max of 30
+dlc:save-bits.c:320:float_i2f: Zapping function body!
+
+4. Compiling and running './btest -g -r 2' to determine performance score.
+gcc -O -Wall -m64 -lm -o btest bits.c btest.c decl.c tests.c 
+
+
+5. Running './dlc -e' to get operator count of each function.
+
+Correctness Results	Perf Results
+Points	Rating	Errors	Points	Ops	Puzzle
+1	1	0	2	4	bitAnd
+2	2	0	2	3	getByte
+3	3	0	2	10	logicalShift
+0	4	1	0	0	bitCount
+0	4	1	0	1	bang
+1	1	0	2	1	tmin
+2	2	0	2	7	fitsBits
+2	2	0	2	12	divpwr2
+2	2	0	2	2	negate
+3	3	0	2	5	isPositive
+3	3	0	2	14	isLessOrEqual
+0	4	1	0	0	ilog2
+2	2	0	2	7	float_neg
+0	4	1	0	33	float_i2f
+4	4	0	2	11	float_twice
+
+Score = 47/71 [25/41 Corr + 22/30 Perf] (110 total operators)

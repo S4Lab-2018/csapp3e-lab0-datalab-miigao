@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * Mi Gao
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -139,7 +139,8 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+
+  return ~((~x) | (~y));
 }
 /* 
  * getByte - Extract byte n from word x
@@ -151,13 +152,7 @@ int bitAnd(int x, int y) {
  */
 int getByte(int x, int n) {
 
-
-
-
-
-
-
-  return 2;
+  return 255 & (x >> (n << 3));
 
 }
 /* 
@@ -169,7 +164,8 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+
+  return (~((!!n) << 31 >> (n + (~1 + 1)))) & (x >> n);
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -189,7 +185,7 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  return x & 0;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -198,7 +194,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return 2 << 30;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -210,7 +206,9 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+	int s = 32 + ~n + 1;
+	int t = x << s >> s;
+  return !(t ^ x);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -221,7 +219,15 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+/* 
+ * m is mask
+ * po is positive
+ * ne is negative
+ */
+	int m = x >> 31;
+	int po = x >> n;
+	int ne = (x + ((1 << n) + (~1 + 1))) >> n;
+    return (po & ~m) | (ne & m);
 }
 /* 
  * negate - return -x 
@@ -231,7 +237,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -241,7 +247,10 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+/*
+ * if x is zero, return zero
+ */
+  return (!(x >> 31)) & (!!x);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -251,7 +260,9 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+	int z = x + ~y + 1;
+	int ck = !((x ^ y) >> 31);
+  return ((z >> 31) & ck) | (!z) | ((x >> 31) & !ck);
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -261,6 +272,8 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
+	
+	
   return 2;
 }
 /* 
@@ -275,7 +288,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	int m = 1 << 31;
+	if ( (uf & 0x7fffff) && !((uf & 0x7f800000) ^ 0x7f800000) ) return uf;
+	return m ^ uf;
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -287,7 +302,21 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+	int count = 0; unsigned t = x, v = x;
+	int jiema = 127;
+	int ck = x >> 31;
+	if (!x) return 0;
+	if ( ck ) t = ~t + 1;
+	v = t;
+	while (t) { t = t >> 1; count = count + 1; }
+	jiema += count + ~1 + 1;
+	count = count + ~24 + 1;
+	if ( count >> 31 ) { v = v << (~count + 1); }
+	if ( !(count >> 31) ) v = (v >> count) + ((v >> (count + ~1 + 1)) & 1);
+	
+	if (v & 0xff000000) jiema = jiema + 1;
+	
+  return (jiema << 23) | ((ck) & 0x80000000) | (v & 0x7fffff);
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
@@ -301,5 +330,9 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+	if (!uf) return 0;	//if uf == 0, 2*uf is zero
+	if ( !((uf & 0x7f800000) ^ 0x7f800000) ) return uf;	// NaN
+	if ( !(uf & 0x7f800000) )	// non normalized number
+			return ((uf & 0x7fffff) << 1) | (uf & 0x80000000);
+  return uf + 0x800000;
 }
